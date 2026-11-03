@@ -39,9 +39,9 @@ npx wrangler types                    # after changing wrangler.jsonc or .dev.va
 
 ## Status (2026-11-03)
 
-- Live and working: faces API, editor, pause/delete, rotation, redirect to the public URL. CI (GitHub Actions) type-checks and tests every push.
-- **Editor syntax highlighting is pushed but not deployed.** The CI deploy job fails on purpose until the `CLOUDFLARE_API_TOKEN` repo secret is set. Check what is live with `curl -s -o /dev/null -w '%{http_code}' https://clock.recurse.com/highlight.js`.
-- A real person signing in with Recurse on the live site has not been confirmed yet. What is left is in [docs/todo.md](docs/todo.md).
+- Live and working: faces API, editor with syntax highlighting, pause/delete, rotation, redirect to the public URL, and Recurse sign-in (a real person has signed in on https://clock.recurse.com).
+- Auto deploy works. A push to `main` runs CI (type-check and test), then deploys through GitHub Actions with the `CLOUDFLARE_API_TOKEN` repo secret. Confirmed 2026-11-03. See [docs/deploying.md](docs/deploying.md).
+- What is left is in [docs/todo.md](docs/todo.md).
 
 ## Gotchas learned the hard way
 

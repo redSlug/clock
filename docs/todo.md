@@ -15,9 +15,9 @@ CI already type-checks and tests every push. The deploy job exists but fails on 
 
 ## Check it works for real
 
-Done in tests or with fake users, but not yet by a real person on the live site.
+Checked in tests or with fake users. A real person has signed in; the items below are still unchecked on the live site.
 
-- [ ] Sign in with Recurse from https://clock.recurse.com (not the workers.dev address). Real login has not been confirmed since the `state_mismatch` fix.
+- [x] Sign in with Recurse from https://clock.recurse.com (not the workers.dev address). Confirmed by a real person.
 - [ ] On the live site: create a face in the editor, edit it, pause it, resume it, delete it.
 - [ ] Editor in a real browser: cursor position matches the colored text, scrolling stays aligned, Tab indents, Cmd/Ctrl+S saves. Also try it on a phone; the layout stacks, but it has not been tried.
 - [ ] Confirm the display page swaps faces every minute on the real display, and skips a paused face.
