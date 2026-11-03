@@ -67,7 +67,7 @@ npx wrangler types                    # after changing wrangler.jsonc or .dev.va
 
 This project lives in ONE Cloudflare account only: **recurse-round-display**, account ID `78e9f9f85e887bc898342c01067c448c`. Never use any other account.
 
-- Do NOT use the owner's older personal account (ID `cf8a6168894478444be767a94f8ee987`). If `wrangler whoami` ever shows that account, stop and tell the user.
+- Do NOT use the owner's older personal Cloudflare account. If `wrangler whoami` shows any account other than `recurse-round-display` (ID starts `78e9f9f8`), stop and tell the user.
 - `account_id` is pinned in `wrangler.jsonc`. Never remove it. It makes wrangler refuse to act on any other account.
 - Before ANY remote wrangler command, run `npx wrangler whoami` and confirm the account is `78e9f9f8...`.
 - Production deploys normally happen through GitHub Actions on a push to `main` (see [docs/deploying.md](docs/deploying.md)). Do not deploy by hand unless the user asks. Remote commands need the user's explicit OK first: `deploy`, anything with `--remote`, `r2 bucket create/delete`, `d1 create/delete`, `secret put/delete`. Local commands (`--local`, `wrangler dev`, tests) are fine without asking.
