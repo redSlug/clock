@@ -10,7 +10,7 @@ A round LCD clock display. A **Cloudflare Worker** stores circular p5.js "clock 
 
 - Live site: https://clock.recurse.com (a proxy at Recurse in front of the Worker). Display page: `/display`. Editor: `/editor`.
 - **It is an LCD display, not LED.** The Worker, D1, R2 and package names say `circular-led-*` by mistake and stay as they are on purpose. Do not write "LED" anywhere else.
-- GitHub: `redSlug/clock` (public, MIT). `main` is protected: the **Type-check and test** check is required, but pull requests are not (yet), so the owner pushes straight to `main`. Local folder: `/Users/bd/Development/clock`. The repo and folder were renamed from `circular-led-server`; the **Worker, D1 database and npm package keep the name `circular-led-server` on purpose** (renaming them would change the deployed Worker).
+- GitHub: `redSlug/clock` (public, MIT). `main` is protected: every change needs a pull request with the **Type-check and test** check passing (0 approvals, admins cannot bypass, no force pushes). Never push to `main` directly. Local folder: `/Users/bd/Development/clock`. The repo and folder were renamed from `circular-led-server`; the **Worker, D1 database and npm package keep the name `circular-led-server` on purpose** (renaming them would change the deployed Worker).
 - Cloudflare: account `recurse-round-display`, Worker `circular-led-server`, D1 `circular-led-server` (id in `wrangler.jsonc`), R2 bucket `circular-led-faces`.
 
 ## Code map
@@ -116,4 +116,4 @@ How to apply it:
 - `npm test` and `npx tsc --noEmit` should pass before committing.
 - Faces run in a sandboxed iframe with no network. Do not add `allow-same-origin` to that sandbox, or let faces make network requests, without discussing it.
 - Moderation is deliberately open: any signed-in user can pause or delete ANY face; only the owner can edit. Don't tighten or loosen this without asking.
-- Commit and push only when the user asks.
+- Work on a branch and open a pull request. Commit, push and open the PR only when the user asks. Merging is the user's call.
