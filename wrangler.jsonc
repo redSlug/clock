@@ -1,0 +1,38 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "circular-led-server",
+	// Pinned so wrangler can only ever act on this account, never on another one you are logged in to.
+	"account_id": "78e9f9f85e887bc898342c01067c448c",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": true,
+	"preview_urls": false,
+	"assets": {
+		"directory": "public",
+		"binding": "ASSETS",
+		"html_handling": "drop-trailing-slash",
+		"not_found_handling": "none",
+		"run_worker_first": ["/api/*"]
+	},
+	"vars": {
+		// The public address, behind the clock.recurse.com proxy. Sign-in redirects here, so the Recurse OAuth app must have
+		// https://clock.recurse.com/api/v1/auth/callback/recurse as a redirect URI.
+		"BASE_URL": "https://clock.recurse.com",
+		"RC_BASE_URL": "https://www.recurse.com"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "circular-led-server",
+			"database_id": "8d5d6684-3bc2-45ee-aa76-594018e11aed",
+			"migrations_dir": "migrations"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "FACES",
+			"bucket_name": "circular-led-faces"
+		}
+	]
+}
