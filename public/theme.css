@@ -1,0 +1,22 @@
+/* Shared look: blurred photo background, torn-paper cards, green palette, round buttons. Used by every page except the display. */
+html { background: #555 }
+html::before { content: ""; position: fixed; inset: -60px; z-index: -1; background: url(/rc-background.jpeg) center / cover no-repeat; filter: blur(6px) saturate(.6) brightness(.55) }
+body { color: #1f3a1d; font: 16px/1.5 -apple-system, system-ui, sans-serif }
+a { color: #2f6b2a }
+.muted { color: #4a6b43 }
+@font-face { font-family: "Rubik Dirt"; src: url(/fonts/RubikDirt.woff2) format("woff2"); font-display: swap }
+h1, h2 { font-family: "Rubik Dirt", "Chalkduster", Georgia, serif; font-weight: 400; color: #2f5d27; margin: .4em 0 }
+button, .btn { padding: 6px 16px; cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; border: 0; border-radius: 999px; background: #3f7d32; color: #fff; text-decoration: none; display: inline-block; box-shadow: 0 2px 0 #24531f; transition: transform .1s, background .15s }
+button:hover, .btn:hover { background: #2f6b2a; transform: translateY(-1px) }
+button:active, .btn:active { transform: translateY(1px); box-shadow: none }
+/* The one button that cannot be undone: a darker green than the rest, so it stands apart from Pause and Resume. */
+button.danger { background: #1f3a1d; box-shadow: 0 2px 0 #0f1f0e }
+button.danger:hover { background: #152a14 }
+input[type=text], input:not([type]) { border: 1px solid #8aa57a; border-radius: 8px; background: rgba(255,255,255,.7); color: #1f3a1d; font: inherit; padding: 5px 9px }
+
+/* The torn-paper card. Put class "paper" on a wrapper; it needs room around it (margin of 20px or more) for the ragged edge. */
+.paper { position: relative; padding: 2rem 2.2rem; filter: drop-shadow(0 8px 16px rgba(0,0,0,.4)) }
+.paper::before, .paper::after { content: ""; position: absolute; pointer-events: none }
+/* cream under-layer = the paper's pale torn fibre; the green layer on top is torn a bit differently */
+.paper::after { inset: -16px -14px; z-index: -2; background: #f1ecda; filter: url(#torn-edge) }
+.paper::before { inset: -8px -6px; z-index: -1; background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.28), transparent 60%), rgb(214,226,196); filter: url(#torn-top) }
