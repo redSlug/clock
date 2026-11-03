@@ -63,7 +63,7 @@ Safe to re-run: it skips a database, bucket or secret that already exists.
 **Simplest. Answer the prompts. Nothing to type in advance.** Use a separate Terminal window so the hidden prompts work.
 
 ```sh
-cd /Users/bd/Development/circular-led-server
+cd /Users/bd/Development/clock
 npm run setup:cloudflare
 ```
 
