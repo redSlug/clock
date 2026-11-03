@@ -45,8 +45,6 @@ flowchart LR
 
 Sign-in uses Recurse Center OAuth through Better Auth, the same setup as Batchmate. Data model and open questions are in the [design doc](docs/design.md).
 
-> **A note on names:** this is a round **LCD** display, not LED. The Worker, D1 database, R2 bucket and npm package are named `circular-led-*` by mistake. They keep those names for now, because renaming them would change the deployed Worker. Everywhere else, it is LCD.
-
 ## Docs
 
 - [Writing a face](docs/faces.md): the editor, who can do what, and the `face` object your sketch reads.

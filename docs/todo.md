@@ -60,4 +60,4 @@ Checked in tests or with fake users. A real person has signed in; the items belo
 - [x] Branch protection on `main`: the **Type-check and test** check is required, and force pushes and deletions are blocked.
 - [x] Link from the home page (https://clock.recurse.com/) to the GitHub repo.
 - [ ] Decide whether the "How the user likes to work" section of CLAUDE.md should stay in the public repo.
-- [ ] Later: rename the Worker, D1 database, R2 bucket and package from `circular-led-*` to `circular-lcd-*`. The display is an LCD. See the note in the README.
+- [ ] Later: rename the Worker, D1 database, R2 bucket and package from `circular-led-*` to `circular-lcd-*`. The display is an LCD, so the names are a mistake.
