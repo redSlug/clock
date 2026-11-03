@@ -1,0 +1,36 @@
+{
+	"name": "circular-led-server",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"docs": "node scripts/docs-preview.mjs",
+		"cf-typegen": "wrangler types",
+		"type-check": "tsc --noEmit",
+		"test": "vitest run",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate:local": "wrangler d1 migrations apply circular-led-server --local",
+		"db:migrate:remote": "wrangler d1 migrations apply circular-led-server --remote",
+		"seed:local": "node scripts/seed.mjs --local",
+		"seed:remote": "node scripts/seed.mjs --remote",
+		"mock-rc": "node scripts/mock-rc.mjs",
+		"vendor-p5": "node scripts/vendor-p5.mjs",
+		"setup:cloudflare": "bash scripts/setup-cloudflare.sh",
+		"screenshot": "node scripts/screenshot.mjs"
+	},
+	"dependencies": {
+		"better-auth": "^1.7.15",
+		"drizzle-orm": "^0.45.4",
+		"hono": "^4.13.16",
+		"p5": "^2.3.4"
+	},
+	"devDependencies": {
+		"@types/node": "^26.6.6",
+		"drizzle-kit": "^0.31.11",
+		"typescript": "^7.0.2",
+		"vitest": "^5.1.0",
+		"wrangler": "^4.157.0"
+	}
+}

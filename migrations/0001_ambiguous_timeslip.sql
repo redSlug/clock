@@ -1,0 +1,1 @@
+ALTER TABLE `face` ADD `active` integer DEFAULT true NOT NULL;
