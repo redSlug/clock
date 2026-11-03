@@ -186,7 +186,7 @@ Things to think through later:
 
 ### Live editor (WYSIWYG)
 
-**Built first version** at `/editor`: code on one side, live round preview on the other, working starter code for a new face, a test-time box, and Save (new face, or update your own). It uses the same sandbox and runtime as the display, so the preview matches. Still open from the list below: marking what a square canvas loses at the edge, and better phone layout.
+**Built first version** at `/editor`: code on one side, live round preview on the other, working starter code for a new face, syntax highlighting (`public/highlight.js`, no dependencies), a test-time box, and Save (new face, or update your own). It uses the same sandbox and runtime as the display, so the preview matches. Still open from the list below: marking what a square canvas loses at the edge, and better phone layout.
 
 Original notes:
 - The preview must render the same way as the Pi: same sandboxed iframe, same canvas size, same p5 version. This is the "does the preview match the display" open question above. If they differ, the editor is misleading.

@@ -13,13 +13,20 @@
 	button { padding: 6px 14px; cursor: pointer }
 	#status { color: #656d76; font-size: 13px }
 	main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr }
-	#code { border: 0; border-right: 1px solid #d0d7de; resize: none; padding: 12px; outline: none; tab-size: 2; font: 13px/1.5 ui-monospace, Menlo, monospace; white-space: pre; overflow: auto }
+	/* Syntax highlighting: a colored <pre> sits under a transparent textarea. Both must use identical font, padding and wrapping. */
+	.code-wrap { position: relative; min-height: 0; border-right: 1px solid #d0d7de; background: #fff; overflow: hidden }
+	#hl, #code { position: absolute; inset: 0; margin: 0; padding: 12px; border: 0; font: 13px/1.5 ui-monospace, Menlo, monospace; font-variant-ligatures: none; letter-spacing: 0; tab-size: 2; white-space: pre; overflow: auto }
+	#hl { overflow: hidden; pointer-events: none; color: #1f2328 }
+	#code { resize: none; outline: none; background: transparent; color: transparent; -webkit-text-fill-color: transparent; caret-color: #1f2328 }
+	#code::selection { background: rgba(9, 105, 218, .25) }
+	.hl-c { color: #6e7781; font-style: italic } .hl-s { color: #0a3069 } .hl-n { color: #0550ae } .hl-k { color: #cf222e }
+	.hl-f { color: #8250df } .hl-p { color: #0550ae } .hl-b { color: #953800 }
 	.right { min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: #111; color: #eee }
 	#disc { width: min(100%, 62vh); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #000; outline: 2px solid #333 }
 	#err { color: #f88; font: 12px ui-monospace, monospace; min-height: 1.4em; max-width: 100%; overflow-wrap: anywhere }
 	.right label { font-size: 13px; display: flex; gap: 6px; align-items: center }
 	a { color: #0969da }
-	@media (max-width: 800px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr } #code { border-right: 0; border-bottom: 1px solid #d0d7de } #disc { width: min(100%, 38vh) } }
+	@media (max-width: 800px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr }   .code-wrap { border-right: 0; border-bottom: 1px solid #d0d7de } #disc { width: min(100%, 38vh) } }
 </style>
 </head>
 <body>
@@ -30,7 +37,10 @@
 	<span id="status"></span>
 </header>
 <main>
-	<textarea id="code" spellcheck="false" aria-label="p5.js code"></textarea>
+	<div class="code-wrap">
+		<pre id="hl" aria-hidden="true"></pre>
+		<textarea id="code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="p5.js code"></textarea>
+	</div>
 	<div class="right">
 		<div id="disc"></div>
 		<label>Test time <input id="time" placeholder="10:10 (blank = live)" size="16"> <button id="live" type="button">Live</button></label>
@@ -38,6 +48,7 @@
 	</div>
 </main>
 <script src="/host.js"></script>
+<script src="/highlight.js"></script>
 <script>
 	var $ = function (id) { return document.getElementById(id) }
 	var faceId = new URLSearchParams(location.search).get("id")
@@ -59,13 +70,22 @@
 	}
 	function renderSoon() { clearTimeout(timer); timer = setTimeout(render, 400) }
 
-	$("code").addEventListener("input", renderSoon)
+	// Colors the code. The trailing newline keeps the last (possibly empty) line the same height as in the textarea.
+	function paint() {
+		$("hl").innerHTML = Highlight.html($("code").value) + "\n"
+		$("hl").scrollTop = $("code").scrollTop
+		$("hl").scrollLeft = $("code").scrollLeft
+	}
+	$("code").addEventListener("scroll", function () { $("hl").scrollTop = this.scrollTop; $("hl").scrollLeft = this.scrollLeft })
+
+	$("code").addEventListener("input", function () { paint(); renderSoon() })
 	$("code").addEventListener("keydown", function (e) {
 		if (e.key === "Tab") { // Tab indents instead of leaving the box
 			e.preventDefault()
 			var t = e.target, s = t.selectionStart
 			t.value = t.value.slice(0, s) + "  " + t.value.slice(t.selectionEnd)
 			t.selectionStart = t.selectionEnd = s + 2
+			paint()
 			renderSoon()
 		}
 	})
@@ -107,6 +127,7 @@
 			$("name").value = "My new face"
 			$("code").value = await fetch("/starter-face.js").then(function (r) { return r.text() })
 		}
+		paint()
 		render()
 	}
 	init().catch(function (e) { setStatus(e.message) })
