@@ -10,7 +10,7 @@ A push to `main` runs CI (type-check and test), then deploys. It works; see [doc
 - [x] Store it: `gh secret set CLOUDFLARE_API_TOKEN` (in your own terminal; the value is hidden).
 - [x] Re-run the failed deploy job: `gh run rerun <run id> --failed`. This ships anything not yet live, such as the editor syntax highlighting.
 - [ ] Disconnect the Cloudflare dashboard Git integration (Workers & Pages, circular-led-server, Settings, Builds) if it is connected, so a push does not deploy twice.
-- [ ] Move from pushing straight to `main` to pull requests. First squash the early commits. Then tighten the existing branch protection on `main`: require a pull request, and turn on "Do not allow bypassing" for admins. Decide whether to require approval on the `production` environment.
+- [x] Pull requests are required. `main` now needs a pull request with the **Type-check and test** check passing. No approvals are needed (so you can merge your own), admins cannot bypass it, and force pushes are blocked. Still open: decide whether to require approval on the `production` environment.
 - [x] CI status badge in the README.
 
 ## Check it works for real
@@ -57,7 +57,7 @@ Checked in tests or with fake users. A real person has signed in; the items belo
 - [x] MIT license, credits for redSlug and fcjr, and a note on the vendored p5.js license ([docs/third-party.md](third-party.md)).
 - [x] Dependabot for npm packages and GitHub Actions.
 - [x] GitHub secret scanning and push protection are on (the repo is public).
-- [x] Branch protection on `main`: the **Type-check and test** check is required, force pushes and deletions are blocked. Pull requests are not required yet and admins can bypass, so pushing straight to `main` still works.
+- [x] Branch protection on `main`: the **Type-check and test** check is required, and force pushes and deletions are blocked.
 - [x] Link from the home page (https://clock.recurse.com/) to the GitHub repo.
 - [ ] Decide whether the "How the user likes to work" section of CLAUDE.md should stay in the public repo.
 - [ ] Later: rename the Worker, D1 database, R2 bucket and package from `circular-led-*` to `circular-lcd-*`. The display is an LCD. See the note in the README.
