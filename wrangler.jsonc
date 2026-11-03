@@ -1,0 +1,34 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "circular-led-server",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"workers_dev": true,
+	"preview_urls": false,
+	"assets": {
+		"directory": "public",
+		"binding": "ASSETS",
+		"html_handling": "drop-trailing-slash",
+		"not_found_handling": "none",
+		"run_worker_first": ["/api/*"]
+	},
+	"vars": {
+		"BASE_URL": "https://REPLACE_WITH_NEW_WORKER_URL",
+		"RC_BASE_URL": "https://www.recurse.com"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "circular-led-server",
+			"database_id": "REPLACE_WITH_NEW_D1_DATABASE_ID",
+			"migrations_dir": "migrations"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "FACES",
+			"bucket_name": "circular-led-faces"
+		}
+	]
+}

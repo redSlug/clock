@@ -1,0 +1,7 @@
+# Copy to .dev.vars (gitignored).
+BETTER_AUTH_SECRET=""   # generate with: openssl rand -base64 32
+BASE_URL="http://localhost:8787"
+# Real Recurse: https://www.recurse.com   Local fake Recurse (npm run mock-rc): http://localhost:9999
+RC_BASE_URL="http://localhost:9999"
+RC_CLIENT_ID=""
+RC_CLIENT_SECRET=""

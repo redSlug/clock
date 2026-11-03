@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circular LED</title>
+<style>
+	body { font: 16px/1.5 -apple-system, system-ui, sans-serif; max-width: 760px; margin: 0 auto; padding: 1.5rem; color: #1f2328 }
+	h1, h2 { margin: .4em 0 }
+	textarea { width: 100%; min-height: 14em; font: 13px/1.4 ui-monospace, monospace; box-sizing: border-box }
+	input[type=text] { width: 100%; box-sizing: border-box; padding: 6px }
+	button { padding: 6px 14px; cursor: pointer }
+	li { margin: .3em 0 }
+	.muted { color: #656d76 } #msg { min-height: 1.5em }
+</style>
+</head>
+<body>
+<h1>Circular LED</h1>
+<p class="muted">Clock faces for a round display. <a href="/display">Open the display page</a>.</p>
+
+<p id="who">Loading…</p>
+
+<h2>Faces</h2>
+<ul id="faces"></ul>
+
+<section id="upload" hidden>
+	<h2>Upload a face</h2>
+	<p class="muted">One p5.js sketch. Use <code>face.hourAngle</code>, <code>face.minuteAngle</code> and <code>face.size</code> to draw a clock. See the README for the full list.</p>
+	<p><input id="name" type="text" maxlength="80" placeholder="Name"></p>
+	<p><textarea id="source" spellcheck="false" placeholder="function setup() { createCanvas(face.size, face.size) }&#10;function draw() { ... }"></textarea></p>
+	<p><button id="send">Upload</button> <span id="msg"></span></p>
+</section>
+
+<script>
+	var $ = function (id) { return document.getElementById(id) }
+	var me = null
+
+	async function api(path, opts) {
+		var res = await fetch("/api/v1" + path, opts)
+		var body = res.status === 204 ? null : await res.json().catch(function () { return null })
+		if (!res.ok) throw new Error((body && body.error) || "request failed: " + res.status)
+		return body
+	}
+
+	function renderWho() {
+		var who = $("who")
+		who.textContent = ""
+		if (me) {
+			who.append("Signed in as " + me.name + " ")
+			var out = document.createElement("button")
+			out.textContent = "Sign out"
+			out.onclick = async function () {
+				await fetch("/api/v1/auth/sign-out", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
+				location.reload()
+			}
+			who.append(out)
+		} else {
+			var inb = document.createElement("button")
+			inb.textContent = "Sign in with Recurse"
+			inb.onclick = async function () {
+				var r = await fetch("/api/v1/auth/sign-in/social", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ provider: "recurse", callbackURL: "/" }),
+				}).then(function (x) { return x.json() })
+				location.href = r.url
+			}
+			who.append(inb)
+		}
+		$("upload").hidden = !me
+	}
+
+	async function renderFaces() {
+		var list = $("faces")
+		list.textContent = ""
+		var faces = await api("/faces")
+		if (!faces.length) list.textContent = "No faces yet."
+		faces.forEach(function (f) {
+			var li = document.createElement("li")
+			var a = document.createElement("a")
+			a.href = "/preview?id=" + f.id
+			a.textContent = f.name // textContent, never innerHTML: names are user input
+			li.append(a, " by " + f.author + " ")
+			list.append(li)
+		})
+	}
+
+	$("send").onclick = async function () {
+		$("msg").textContent = "Uploading…"
+		try {
+			var made = await api("/faces", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name: $("name").value, source: $("source").value }),
+			})
+			$("msg").textContent = "Uploaded."
+			location.href = "/preview?id=" + made.id
+		} catch (e) {
+			$("msg").textContent = e.message
+		}
+	}
+
+	api("/me").then(function (u) { me = u }, function () { me = null }).then(renderWho)
+	renderFaces().catch(function (e) { $("faces").textContent = e.message })
+</script>
+</body>
+</html>
