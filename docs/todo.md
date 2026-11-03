@@ -4,11 +4,11 @@ What is left, roughly in the order to do it. Tick items off as they are done.
 
 ## Auto deploy (do this first)
 
-CI already type-checks and tests every push. The deploy job exists but fails on purpose until the secret is added (see README, CI/CD).
+CI already type-checks and tests every push. The deploy job exists but fails on purpose until the secret is added (see [docs/deploying.md](deploying.md)).
 
-- [ ] Create a Cloudflare API token limited to the **recurse-round-display** account: Workers Scripts (Edit), D1 (Edit), Workers R2 Storage (Edit). Give it an expiry and note the date here so it gets rotated.
-- [ ] Store it: `gh secret set CLOUDFLARE_API_TOKEN` (in your own terminal; the value is hidden).
-- [ ] Re-run the failed deploy job: `gh run rerun <run id> --failed`. This ships anything not yet live, such as the editor syntax highlighting.
+- [x] Create a Cloudflare API token limited to the **recurse-round-display** account: Workers Scripts (Edit), D1 (Edit), Workers R2 Storage (Edit). Give it an expiry and note the date here so it gets rotated.
+- [x] Store it: `gh secret set CLOUDFLARE_API_TOKEN` (in your own terminal; the value is hidden).
+- [x] Re-run the failed deploy job: `gh run rerun <run id> --failed`. This ships anything not yet live, such as the editor syntax highlighting.
 - [ ] Disconnect the Cloudflare dashboard Git integration (Workers & Pages, circular-led-server, Settings, Builds) if it is connected, so a push does not deploy twice.
 - [ ] Optional: add a branch protection rule on `main` that requires the **Type-check and test** check, and require approval on the `production` environment.
 - [ ] Optional: add a CI status badge to the README.
@@ -27,7 +27,7 @@ Done in tests or with fake users, but not yet by a real person on the live site.
 - [ ] Write the setup steps: a browser in kiosk mode on https://clock.recurse.com/display, starting at boot, with the screen never sleeping.
 - [ ] Set the timezone (or add `?tz=America/New_York` to the display URL) and make sure network time (NTP) is on. A Pi has no battery-backed clock.
 - [ ] Decide what the Pi shows when the network is down. Today it keeps the current face, or the built-in clock if nothing has loaded yet.
-- [ ] Set the real face size. `face.size` is 720 by default, so match it to the LED display's resolution (`?size=`).
+- [ ] Set the real face size. `face.size` is 720 by default, so match it to the LCD display's resolution (`?size=`).
 - [ ] Hide the mouse cursor and any browser UI on the display.
 
 ## Product decisions still open

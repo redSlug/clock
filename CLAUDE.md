@@ -4,11 +4,12 @@ Project guide for coding assistants. Human-facing docs: [README.md](README.md), 
 
 ## What this is
 
-A round LED clock display. A **Cloudflare Worker** stores circular p5.js "clock faces", and a **Raspberry Pi** runs a fullscreen browser on `/display`, which asks the API for a new face every minute and shows it over HDMI. People sign in with **Recurse Center OAuth** (Better Auth), write faces in a live editor, and can pause or delete any face. Theme is a clock, but a face can be any circular sketch.
+A round LCD clock display. A **Cloudflare Worker** stores circular p5.js "clock faces", and a **Raspberry Pi** runs a fullscreen browser on `/display`, which asks the API for a new face every minute and shows it over HDMI. People sign in with **Recurse Center OAuth** (Better Auth), write faces in a live editor, and can pause or delete any face. Theme is a clock, but a face can be any circular sketch.
 
 ## Where things are
 
 - Live site: https://clock.recurse.com (a proxy at Recurse in front of the Worker). Display page: `/display`. Editor: `/editor`.
+- **It is an LCD display, not LED.** The Worker, D1, R2 and package names say `circular-led-*` by mistake and stay as they are on purpose. Do not write "LED" anywhere else.
 - GitHub: `redSlug/clock` (private). Local folder: `/Users/bd/Development/clock`. The repo and folder were renamed from `circular-led-server`; the **Worker, D1 database and npm package keep the name `circular-led-server` on purpose** (renaming them would change the deployed Worker).
 - Cloudflare: account `recurse-round-display`, Worker `circular-led-server`, D1 `circular-led-server` (id in `wrangler.jsonc`), R2 bucket `circular-led-faces`.
 
@@ -69,7 +70,7 @@ This project lives in ONE Cloudflare account only: **recurse-round-display**, ac
 - Do NOT use the owner's older personal account (ID `cf8a6168894478444be767a94f8ee987`). If `wrangler whoami` ever shows that account, stop and tell the user.
 - `account_id` is pinned in `wrangler.jsonc`. Never remove it. It makes wrangler refuse to act on any other account.
 - Before ANY remote wrangler command, run `npx wrangler whoami` and confirm the account is `78e9f9f8...`.
-- Production deploys normally happen through GitHub Actions on a push to `main` (see the README, CI/CD). Do not deploy by hand unless the user asks. Remote commands need the user's explicit OK first: `deploy`, anything with `--remote`, `r2 bucket create/delete`, `d1 create/delete`, `secret put/delete`. Local commands (`--local`, `wrangler dev`, tests) are fine without asking.
+- Production deploys normally happen through GitHub Actions on a push to `main` (see [docs/deploying.md](docs/deploying.md)). Do not deploy by hand unless the user asks. Remote commands need the user's explicit OK first: `deploy`, anything with `--remote`, `r2 bucket create/delete`, `d1 create/delete`, `secret put/delete`. Local commands (`--local`, `wrangler dev`, tests) are fine without asking.
 - Before deleting anything remote, look at what is in it and tell the user.
 
 ## Credentials

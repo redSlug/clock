@@ -21,7 +21,7 @@ Consequence of the public read endpoint: anyone who finds the URL can read faces
 
 Decision so far: sign in with **Recurse Center OAuth**, using **Better Auth** with the full auth flow, the same approach as [Batchmate](https://github.com/rc-batchmates/batchmate-app).
 
-The full sign-in sequence is in the [README](../README.md#how-sign-in-works-modeled-on-batchmate).
+The full sign-in sequence is in the [sign-in doc](sign-in.md#how-sign-in-works-modeled-on-batchmate).
 
 ### Notes from Batchmate
 
@@ -116,7 +116,7 @@ Not decided yet:
 
 ## Face contract
 
-How a face gets time and size. The published version for authors is in the [README](../README.md#writing-a-face). This section is the thinking behind it. Status: proposal.
+How a face gets time and size. The published version for authors is in the [faces doc](faces.md). This section is the thinking behind it. Status: proposal.
 
 ### Why not just use p5's `hour()` and `minute()`?
 
@@ -159,7 +159,7 @@ Order inside the sandboxed iframe: load p5, then the face runtime, then the user
 
 ### Open
 
-- Fixed `face.size`: which number? Depends on the actual LED display resolution.
+- Fixed `face.size`: which number? Depends on the actual LCD display resolution.
 - Do we also offer `face.millis` or a `face.date` for faces that show the date?
 - Should faces be allowed to call `fetch()`? In a public read endpoint, a face that can call out can load other sites. Default plan: the sandbox blocks network access.
 - Does the runtime wait for p5 to finish loading, or does the page? Not decided.
@@ -175,7 +175,7 @@ Not designed yet. These are parked here so we don't lose them.
 
 ### Draw on your phone
 
-Someone draws on their phone, for example a happy face, and the drawing becomes p5.js source code that is uploaded as a face. They see their own drawing show up on the LED display.
+Someone draws on their phone, for example a happy face, and the drawing becomes p5.js source code that is uploaded as a face. They see their own drawing show up on the LCD display.
 
 Things to think through later:
 - How a drawing becomes p5 code: record strokes as points and generate `line()` or `curve()` calls, or save the drawing as an image or SVG and wrap it in a small sketch.
@@ -196,3 +196,13 @@ Original notes:
 - Save goes through the normal upload path (R2 file plus D1 row), so a face written in the editor is just another face.
 - Works on a phone too, since phones are a client. A split view may need to stack top and bottom on a small screen.
 - Could be the first thing built after the core, since it reuses the preview and sandbox. Ordering is not decided.
+
+## Pieces
+
+| Piece | Role |
+| --- | --- |
+| Clients | A developer or a phone. Sign in, write and preview faces in the live editor, save them, pause or delete faces. |
+| Worker API | The only backend. Auth (Better Auth + Recurse OAuth), upload, get a face, serve the page. |
+| D1 (SQLite) | Users, sessions, and a faces table with each face's R2 path. |
+| R2 | The p5 source files. |
+| Raspberry Pi | A fullscreen browser. Every minute it asks the API for a new face and shows it. |

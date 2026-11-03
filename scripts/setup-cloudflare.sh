@@ -4,7 +4,7 @@
 #
 # USAGE
 #   npm run setup:cloudflare        # interactive. Type each value at its prompt; secrets are hidden. No file needed.
-#   npm run setup:cloudflare -- --env-file ~/.config/circular-led/setup.env --yes   # non-interactive alternative
+#   npm run setup:cloudflare -- --env-file ~/.config/circular-lcd/setup.env --yes   # non-interactive alternative
 #
 # PASSING VALUES. Easiest: just run it and answer the prompts. Alternatively set these variables (or use --env-file).
 # Anything missing is prompted for when you run it in a terminal.

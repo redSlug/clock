@@ -32,7 +32,7 @@ const files = fs.readdirSync(dir).filter((f) => f.endsWith(".js")).sort()
 const nice = (f) => f.replace(/\.js$/, "").replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase())
 const q = (s) => `'${s.replace(/'/g, "''")}'`
 
-let sql = `INSERT OR IGNORE INTO user (id, name, email, email_verified) VALUES ('seed-user', 'Example faces', 'seed@circular-led.invalid', 1);\n`
+let sql = `INSERT OR IGNORE INTO user (id, name, email, email_verified) VALUES ('seed-user', 'Example faces', 'seed@circular-lcd.invalid', 1);\n`
 for (const f of files) {
 	const key = `seed/${f}`
 	putObject(key, path.join(dir, f))
