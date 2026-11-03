@@ -4,6 +4,8 @@ A Cloudflare Worker API that stores circular p5.js clock faces, plus a Raspberry
 
 **Live at https://clock.recurse.com/** (display page: https://clock.recurse.com/display)
 
+What is left to do: [docs/todo.md](docs/todo.md).
+
 <p align="center"><img src="docs/images/clock-face.png" width="360" alt="The tick-marks example face, a round clock showing 10:10"></p>
 
 ## Architecture
