@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/redirect.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Face editor</title>
+<style>
+	* { box-sizing: border-box }
+	body { margin: 0; height: 100vh; display: flex; flex-direction: column; font: 15px/1.4 -apple-system, system-ui, sans-serif; color: #1f2328 }
+	header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #d0d7de; background: #f6f8fa }
+	header input[type=text] { flex: 1; min-width: 140px; max-width: 360px; padding: 6px 8px }
+	button { padding: 6px 14px; cursor: pointer }
+	#status { color: #656d76; font-size: 13px }
+	main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr }
+	/* Syntax highlighting: a colored <pre> sits under a transparent textarea. Both must use identical font, padding and wrapping. */
+	.code-wrap { position: relative; min-height: 0; border-right: 1px solid #d0d7de; background: #fff; overflow: hidden }
+	#hl, #code { position: absolute; inset: 0; margin: 0; padding: 12px; border: 0; font: 13px/1.5 ui-monospace, Menlo, monospace; font-variant-ligatures: none; letter-spacing: 0; tab-size: 2; white-space: pre; overflow: auto }
+	#hl { overflow: hidden; pointer-events: none; color: #1f2328 }
+	#code { resize: none; outline: none; background: transparent; color: transparent; -webkit-text-fill-color: transparent; caret-color: #1f2328 }
+	#code::selection { background: rgba(9, 105, 218, .25) }
+	.hl-c { color: #6e7781; font-style: italic } .hl-s { color: #0a3069 } .hl-n { color: #0550ae } .hl-k { color: #cf222e }
+	.hl-f { color: #8250df } .hl-p { color: #0550ae } .hl-b { color: #953800 }
+	.right { min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: #111; color: #eee }
+	#disc { width: min(100%, 62vh); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #000; outline: 2px solid #333 }
+	#err { color: #f88; font: 12px ui-monospace, monospace; min-height: 1.4em; max-width: 100%; overflow-wrap: anywhere }
+	.right label { font-size: 13px; display: flex; gap: 6px; align-items: center }
+	a { color: #0969da }
+	@media (max-width: 800px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr }   .code-wrap { border-right: 0; border-bottom: 1px solid #d0d7de } #disc { width: min(100%, 38vh) } }
+</style>
+</head>
+<body>
+<header>
+	<a href="/">&larr; Faces</a>
+	<input id="name" type="text" maxlength="80" placeholder="Face name" aria-label="Face name">
+	<button id="save">Save</button>
+	<span id="status"></span>
+</header>
+<main>
+	<div class="code-wrap">
+		<pre id="hl" aria-hidden="true"></pre>
+		<textarea id="code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="p5.js code"></textarea>
+	</div>
+	<div class="right">
+		<div id="disc"></div>
+		<label>Test time <input id="time" placeholder="10:10 (blank = live)" size="16"> <button id="live" type="button">Live</button></label>
+		<div id="err"></div>
+	</div>
+</main>
+<script src="/host.js"></script>
+<script src="/highlight.js"></script>
+<script>
+	var $ = function (id) { return document.getElementById(id) }
+	var faceId = new URLSearchParams(location.search).get("id")
+	var me = null, canEdit = false, mounted = null, timer = null
+
+	async function api(path, opts) {
+		var res = await fetch("/api/v1" + path, opts)
+		var body = res.status === 204 ? null : await res.json().catch(function () { return null })
+		if (!res.ok) throw new Error((body && body.error) || "request failed: " + res.status)
+		return body
+	}
+	function setStatus(t) { $("status").textContent = t }
+
+	// Redraws the preview from what is in the editor, in the same sandbox the display uses.
+	function render() {
+		if (mounted) mounted.destroy()
+		$("err").textContent = ""
+		mounted = FaceHost.mount($("disc"), $("code").value, { size: 720, time: $("time").value || undefined }, function (m) { $("err").textContent = m })
+	}
+	function renderSoon() { clearTimeout(timer); timer = setTimeout(render, 400) }
+
+	// Colors the code. The trailing newline keeps the last (possibly empty) line the same height as in the textarea.
+	function paint() {
+		$("hl").innerHTML = Highlight.html($("code").value) + "\n"
+		$("hl").scrollTop = $("code").scrollTop
+		$("hl").scrollLeft = $("code").scrollLeft
+	}
+	$("code").addEventListener("scroll", function () { $("hl").scrollTop = this.scrollTop; $("hl").scrollLeft = this.scrollLeft })
+
+	$("code").addEventListener("input", function () { paint(); renderSoon() })
+	$("code").addEventListener("keydown", function (e) {
+		if (e.key === "Tab") { // Tab indents instead of leaving the box
+			e.preventDefault()
+			var t = e.target, s = t.selectionStart
+			t.value = t.value.slice(0, s) + "  " + t.value.slice(t.selectionEnd)
+			t.selectionStart = t.selectionEnd = s + 2
+			paint()
+			renderSoon()
+		}
+	})
+	$("time").addEventListener("input", function () { mounted && mounted.setTime($("time").value) })
+	$("live").addEventListener("click", function () { $("time").value = ""; mounted && mounted.setTime(null) })
+
+	async function save() {
+		if (!me) { setStatus("Sign in to save."); return }
+		setStatus("Saving…")
+		var payload = JSON.stringify({ name: $("name").value, source: $("code").value })
+		var headers = { "Content-Type": "application/json" }
+		try {
+			if (faceId && canEdit) {
+				await api("/faces/" + faceId, { method: "PUT", headers: headers, body: payload })
+				setStatus("Saved.")
+			} else {
+				var made = await api("/faces", { method: "POST", headers: headers, body: payload })
+				faceId = String(made.id); canEdit = true
+				history.replaceState(null, "", "/editor?id=" + made.id)
+				setStatus("Saved as a new face.")
+			}
+		} catch (e) { setStatus(e.message) }
+	}
+	$("save").addEventListener("click", save)
+	addEventListener("keydown", function (e) { if ((e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); save() } })
+
+	async function init() {
+		try { me = await api("/me") } catch (e) { me = null }
+		if (!me) { $("save").textContent = "Sign in to save"; $("save").onclick = function () { location.href = "/" } }
+		if (faceId) {
+			var meta = await api("/faces/" + encodeURIComponent(faceId))
+			var src = await fetch(meta.sourceUrl).then(function (r) { return r.text() })
+			canEdit = !!me && meta.userId === me.id
+			$("name").value = canEdit ? meta.name : meta.name + " (copy)"
+			$("code").value = src
+			if (!canEdit) setStatus(me ? "Not your face: Save makes your own copy." : "")
+		} else {
+			// New face: start from working example code, with setup() and draw() already written.
+			$("name").value = "My new face"
+			$("code").value = await fetch("/starter-face.js").then(function (r) { return r.text() })
+		}
+		paint()
+		render()
+	}
+	init().catch(function (e) { setStatus(e.message) })
+</script>
+</body>
+</html>
