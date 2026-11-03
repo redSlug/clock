@@ -82,6 +82,8 @@ export const face = sqliteTable(
 			.references(() => user.id, { onDelete: "cascade" }),
 		name: text("name").notNull(),
 		r2Key: text("r2_key").notNull(),
+		// false = paused: hidden from the rotation, but kept so anyone can resume it.
+		active: integer("active", { mode: "boolean" }).default(true).notNull(),
 		createdAt: integer("created_at", { mode: "timestamp_ms" })
 			.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
 			.notNull(),

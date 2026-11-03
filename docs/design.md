@@ -9,6 +9,8 @@ Work in progress. Sections are stubs while we are still deciding.
 | How does the Pi read faces? | Public read endpoint. No login or token on the Pi. Only uploading needs sign-in. |
 | Which face next? | Next in order. The Pi sends the id it just showed. |
 | Who can upload? | Any signed-in RC person. Faces run in a sandboxed iframe. |
+| Who can edit a face? | Only its owner. Anyone can open it in the editor and save their own copy. |
+| Who can pause or delete a face? | Any signed-in RC person, for any face. Pause hides it from the rotation without deleting it. Delete is permanent. |
 | Phone client | Mobile web page. Plain Better Auth cookies, no Expo plugin. |
 | Where does rotation happen? | Front end, every minute. |
 | Where does data live? | D1 (SQLite) for users, sessions and faces. R2 for the p5 files. |
@@ -92,6 +94,7 @@ erDiagram
         text userId FK
         text name
         text r2Key "path to the p5 file in R2"
+        bool active "false = paused, skipped by the rotation"
         int createdAt
     }
 ```
@@ -102,7 +105,7 @@ erDiagram
 
 Rotation happens on the front end. The page running in the Pi's browser asks the API for a new face every minute and swaps to it. The API just answers "give me a face"; it does not keep track of what is on screen.
 
-Decided: **next in order**. The Pi tells the API the id of the face it just showed, and the API returns the face after it, wrapping back to the first at the end. The Pi starts with no id and gets the first face.
+Decided: **next in order**, skipping paused faces. The Pi tells the API the id of the face it just showed, and the API returns the face after it, wrapping back to the first at the end. The Pi starts with no id and gets the first face.
 
 Edge cases (implemented):
 - The face the Pi just showed was deleted: return the next face with a larger id (ids only grow, so id order is creation order).
@@ -162,6 +165,10 @@ Order inside the sandboxed iframe: load p5, then the face runtime, then the user
 - Does the runtime wait for p5 to finish loading, or does the page? Not decided.
 - Do faces that don't use the `face` object still need `createCanvas(face.size, ...)`? Probably they should call it with `face.size` too, or the host can do it for them. Not decided.
 
+## Moderation
+
+Any signed-in person can pause, resume or delete any face. That was a deliberate choice for a small, trusted community. The risk is that anyone can remove someone else's work, and deleting is permanent (the R2 file is removed too). Pausing is the gentle option: it hides the face from the display but keeps it. If this becomes a problem, options are soft delete, an owner-or-admin rule, or an audit log. Not built yet.
+
 ## Ideas (later phases)
 
 Not designed yet. These are parked here so we don't lose them.
@@ -179,9 +186,9 @@ Things to think through later:
 
 ### Live editor (WYSIWYG)
 
-A page with a code editor on one side and a live round preview on the other, so people can see what the display will look like while they write a face.
+**Built first version** at `/editor`: code on one side, live round preview on the other, working starter code for a new face, a test-time box, and Save (new face, or update your own). It uses the same sandbox and runtime as the display, so the preview matches. Still open from the list below: marking what a square canvas loses at the edge, and better phone layout.
 
-Things to think through:
+Original notes:
 - The preview must render the same way as the Pi: same sandboxed iframe, same canvas size, same p5 version. This is the "does the preview match the display" open question above. If they differ, the editor is misleading.
 - Include a time control (a slider or a text box) that sets the override on `face`, so authors can check any time, such as 10:10 or 6 p.m.
 - Run the code on every edit (debounced), and show errors from the sketch instead of a blank circle.

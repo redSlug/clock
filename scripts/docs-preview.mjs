@@ -24,7 +24,18 @@ const files = [...preferred, ...rest].filter((f) => fs.existsSync(f));
 const docs = Object.fromEntries(files.map((f) => [f.split(path.sep).join("/"), fs.readFileSync(f, "utf8")]));
 const order = Object.keys(docs);
 const start = (process.argv[2] ?? "README.md").split(path.sep).join("/");
-const data = JSON.stringify({ docs, order, start }).replace(/</g, "\\u003c");
+// Local images referenced by the docs, inlined as data URIs so they show in this temp-file preview.
+const mime = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".svg": "image/svg+xml" };
+const images = {};
+for (const f of files) {
+	for (const m of fs.readFileSync(f, "utf8").matchAll(/(?:!\[[^\]]*\]\(|<img[^>]*\ssrc=")([^)"\s]+)/g)) {
+		if (/^(https?:|data:)/.test(m[1])) continue;
+		const abs = path.join(path.dirname(f), m[1]);
+		const type = mime[path.extname(abs).toLowerCase()];
+		if (type && fs.existsSync(abs)) images[path.relative(".", abs).split(path.sep).join("/")] = `data:${type};base64,${fs.readFileSync(abs).toString("base64")}`;
+	}
+}
+const data = JSON.stringify({ docs, order, start, images }).replace(/</g, "\\u003c");
 
 const out = path.join(os.tmpdir(), "docs-preview.html");
 fs.writeFileSync(
@@ -50,7 +61,7 @@ fs.writeFileSync(
 <script type="module">
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-const { docs, order, start } = ${data};
+const { docs, order, start, images } = ${data};
 mermaid.initialize({ startOnLoad: false });
 
 const title = (p) => (docs[p].match(/^#\\s+(.+)$/m)?.[1] ?? p).replace(/\`/g, "");
@@ -90,6 +101,10 @@ async function show(path, frag) {
     const div = document.createElement("div");
     div.className = "mermaid"; div.textContent = code.textContent;
     code.parentElement.replaceWith(div);
+  }
+  for (const img of out.querySelectorAll("img[src]")) {
+    const src = img.getAttribute("src");
+    if (!/^(https?:|data:)/.test(src) && images[norm(path, src)]) img.src = images[norm(path, src)];
   }
   for (const a of out.querySelectorAll("a[href]")) {
     const href = a.getAttribute("href");

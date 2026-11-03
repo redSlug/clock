@@ -14,6 +14,8 @@ export function createAuth(env: Env, db: DrizzleD1Database<typeof schema>) {
 		baseURL: env.BASE_URL,
 		secret: env.BETTER_AUTH_SECRET,
 		database: drizzleAdapter(db, { provider: "sqlite", schema }),
+		// BASE_URL is the public address people use (https://clock.recurse.com, behind a proxy). Sign-in must start and
+		// finish on that host, so it is the only trusted origin. Pages on the direct workers.dev address redirect to it.
 		trustedOrigins: [env.BASE_URL],
 		user: {
 			additionalFields: {

@@ -1,17 +1,21 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script src="/redirect.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Circular LED</title>
 <style>
 	body { font: 16px/1.5 -apple-system, system-ui, sans-serif; max-width: 760px; margin: 0 auto; padding: 1.5rem; color: #1f2328 }
 	h1, h2 { margin: .4em 0 }
-	textarea { width: 100%; min-height: 14em; font: 13px/1.4 ui-monospace, monospace; box-sizing: border-box }
-	input[type=text] { width: 100%; box-sizing: border-box; padding: 6px }
-	button { padding: 6px 14px; cursor: pointer }
-	li { margin: .3em 0 }
-	.muted { color: #656d76 } #msg { min-height: 1.5em }
+	button, .btn { padding: 4px 12px; cursor: pointer; font: inherit; font-size: 14px }
+	.btn { display: inline-block; border: 1px solid #767676; border-radius: 3px; background: #efefef; color: #000; text-decoration: none }
+	.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eaeef2 }
+	.row .name { flex: 1; min-width: 180px }
+	.paused .name { opacity: .5 }
+	.badge { font-size: 12px; background: #fff8c5; border: 1px solid #d4a72c; border-radius: 10px; padding: 0 8px }
+	.muted { color: #656d76 }
+	#faces { padding: 0 }
 </style>
 </head>
 <body>
@@ -19,17 +23,11 @@
 <p class="muted">Clock faces for a round display. <a href="/display">Open the display page</a>.</p>
 
 <p id="who">Loading…</p>
+<p><a class="btn" href="/editor">+ New face</a></p>
 
 <h2>Faces</h2>
-<ul id="faces"></ul>
-
-<section id="upload" hidden>
-	<h2>Upload a face</h2>
-	<p class="muted">One p5.js sketch. Use <code>face.hourAngle</code>, <code>face.minuteAngle</code> and <code>face.size</code> to draw a clock. See the README for the full list.</p>
-	<p><input id="name" type="text" maxlength="80" placeholder="Name"></p>
-	<p><textarea id="source" spellcheck="false" placeholder="function setup() { createCanvas(face.size, face.size) }&#10;function draw() { ... }"></textarea></p>
-	<p><button id="send">Upload</button> <span id="msg"></span></p>
-</section>
+<div id="faces"></div>
+<p class="muted">Anyone signed in can pause, resume or delete any face. A paused face stays saved but is skipped by the display.</p>
 
 <script>
 	var $ = function (id) { return document.getElementById(id) }
@@ -67,7 +65,17 @@
 			}
 			who.append(inb)
 		}
-		$("upload").hidden = !me
+	}
+
+	function link(text, href) {
+		var a = document.createElement("a")
+		a.className = "btn"; a.href = href; a.textContent = text
+		return a
+	}
+	function button(text, title, onclick) {
+		var b = document.createElement("button")
+		b.textContent = text; b.title = title; b.onclick = onclick
+		return b
 	}
 
 	async function renderFaces() {
@@ -76,32 +84,33 @@
 		var faces = await api("/faces")
 		if (!faces.length) list.textContent = "No faces yet."
 		faces.forEach(function (f) {
-			var li = document.createElement("li")
+			var row = document.createElement("div")
+			row.className = "row" + (f.active ? "" : " paused")
+			var name = document.createElement("span")
+			name.className = "name"
 			var a = document.createElement("a")
 			a.href = "/preview?id=" + f.id
 			a.textContent = f.name // textContent, never innerHTML: names are user input
-			li.append(a, " by " + f.author + " ")
-			list.append(li)
+			name.append(a, " by " + f.author)
+			row.append(name)
+			if (!f.active) { var b = document.createElement("span"); b.className = "badge"; b.textContent = "paused"; row.append(b) }
+			row.append(link(me && me.id === f.userId ? "Edit" : "View code", "/editor?id=" + f.id))
+			if (me) {
+				row.append(button(f.active ? "⏸ Pause" : "▶ Resume", f.active ? "Hide from the display rotation" : "Put back in the display rotation", async function () {
+					try { await api("/faces/" + f.id, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active: !f.active }) }) } catch (e) { alert(e.message) }
+					renderFaces()
+				}))
+				row.append(button("Delete", "Delete this face for everyone", async function () {
+					if (!confirm("Delete \"" + f.name + "\" by " + f.author + "? This cannot be undone.")) return
+					try { await api("/faces/" + f.id, { method: "DELETE" }) } catch (e) { alert(e.message) }
+					renderFaces()
+				}))
+			}
+			list.append(row)
 		})
 	}
 
-	$("send").onclick = async function () {
-		$("msg").textContent = "Uploading…"
-		try {
-			var made = await api("/faces", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name: $("name").value, source: $("source").value }),
-			})
-			$("msg").textContent = "Uploaded."
-			location.href = "/preview?id=" + made.id
-		} catch (e) {
-			$("msg").textContent = e.message
-		}
-	}
-
-	api("/me").then(function (u) { me = u }, function () { me = null }).then(renderWho)
-	renderFaces().catch(function (e) { $("faces").textContent = e.message })
+	api("/me").then(function (u) { me = u }, function () { me = null }).then(function () { renderWho(); return renderFaces() }).catch(function (e) { $("faces").textContent = e.message })
 </script>
 </body>
 </html>

@@ -3,6 +3,8 @@
 import http from "node:http"
 
 const PORT = 9999
+// Who the fake Recurse logs in as. Start with MOCK_USER=2 to be a different person (for testing multi-user rules).
+const n = process.env.MOCK_USER || "1"
 const seen = []
 http
 	.createServer(async (req, res) => {
@@ -26,7 +28,7 @@ http
 		} else if (url.pathname === "/api/v1/profiles/me") {
 			if (req.headers.authorization !== "Bearer mock-access-token") return res.writeHead(401).end("{}")
 			res.writeHead(200, { "Content-Type": "application/json" })
-			res.end(JSON.stringify({ id: 424242, name: "Mock Person", first_name: "Mock", last_name: "Person", email: "mock@example.com", image_path: null, stints: [] }))
+			res.end(JSON.stringify({ id: 424240 + Number(n), name: `Mock Person ${n}`, first_name: "Mock", last_name: `Person ${n}`, email: `mock${n}@example.com`, image_path: null, stints: [] }))
 		} else res.writeHead(404).end()
 	})
 	.listen(PORT, () => console.log(`mock Recurse on http://localhost:${PORT}`))

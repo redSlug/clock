@@ -16,7 +16,8 @@
 		"seed:local": "node scripts/seed.mjs --local",
 		"seed:remote": "node scripts/seed.mjs --remote",
 		"mock-rc": "node scripts/mock-rc.mjs",
-		"vendor-p5": "node scripts/vendor-p5.mjs"
+		"vendor-p5": "node scripts/vendor-p5.mjs",
+		"setup:cloudflare": "bash scripts/setup-cloudflare.sh"
 	},
 	"dependencies": {
 		"better-auth": "^1.7.15",
