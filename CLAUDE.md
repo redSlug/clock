@@ -21,7 +21,7 @@ A round LCD clock display. A **Cloudflare Worker** stores circular p5.js "clock 
   - `index.html` list, pause, delete. `editor.html` live editor. `preview.html` one face. `display.html` + `display.js` the Pi page (URL options: `?every=SECONDS`, `?face=ID`, `?time=HH:MM[:SS]`, `?tz=ZONE`, `?size=PX`, `?transparent`).
   - `runtime/face.js` defines the global `face` object (size, time, hand angles). `host.js` runs a face's source in a **sandboxed iframe** (no network, opaque origin). `highlight.js` editor syntax colors. `redirect.js` sends workers.dev visitors to the public URL. `starter-face.js` the editor's example code.
 - `seed/faces/*.js` example faces. `scripts/` helpers (`seed.mjs`, `mock-rc.mjs`, `setup-cloudflare.sh`, `screenshot.mjs`, `docs-preview.mjs`).
-- Tests are Vitest unit tests in `test/` (face runtime math, highlighter). API rules were only checked by hand so far (see TODO).
+- Tests are Vitest tests in `test/`: face runtime math, highlighter, and `api.test.ts`, which runs the real API against local D1 and R2 with a fake sign-in (`x-test-user` header).
 
 ## Commands
 

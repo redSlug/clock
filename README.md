@@ -1,5 +1,7 @@
 # Circular LCD Server
 
+[![CI](https://github.com/redSlug/clock/actions/workflows/ci.yml/badge.svg)](https://github.com/redSlug/clock/actions/workflows/ci.yml)
+
 A Cloudflare Worker API that stores circular p5.js clock faces, plus a Raspberry Pi that shows them on a round LCD display over HDMI.
 
 **Live at https://clock.recurse.com/** (display page: https://clock.recurse.com/display)
@@ -41,6 +43,15 @@ Sign-in uses Recurse Center OAuth through Better Auth, the same setup as Batchma
 - [Deploying](docs/deploying.md): the Cloudflare account rules and the GitHub Actions deploy.
 - [Recurse sign-in](docs/sign-in.md): registering the OAuth app, and how sign-in works.
 - [Design](docs/design.md): data model, decisions, open questions, and what each piece does.
+- [Third-party code](docs/third-party.md): p5.js and its license.
 - [TODO](docs/todo.md): what is left to do.
 - [Cloudflare setup script](docs/setup-script.md)
 - Rules for coding assistants: [CLAUDE.md](CLAUDE.md)
+
+## Made by
+
+[redSlug](https://github.com/redSlug) and [fcjr](https://github.com/fcjr).
+
+## License
+
+[MIT](LICENSE). The vendored p5.js is LGPL-2.1, see [third-party code](docs/third-party.md).

@@ -4,14 +4,14 @@ What is left, roughly in the order to do it. Tick items off as they are done.
 
 ## Auto deploy (do this first)
 
-CI already type-checks and tests every push. The deploy job exists but fails on purpose until the secret is added (see [docs/deploying.md](deploying.md)).
+A push to `main` runs CI (type-check and test), then deploys. It works; see [docs/deploying.md](deploying.md).
 
-- [x] Create a Cloudflare API token limited to the **recurse-round-display** account: Workers Scripts (Edit), D1 (Edit), Workers R2 Storage (Edit). Give it an expiry and note the date here so it gets rotated.
+- [x] Create a Cloudflare API token limited to the **recurse-round-display** account: Workers Scripts (Edit), D1 (Edit), Workers R2 Storage (Edit). **This token has no expiry** (a choice). Because it never expires, rotate it by hand if it might have leaked, and delete it if the project is retired.
 - [x] Store it: `gh secret set CLOUDFLARE_API_TOKEN` (in your own terminal; the value is hidden).
 - [x] Re-run the failed deploy job: `gh run rerun <run id> --failed`. This ships anything not yet live, such as the editor syntax highlighting.
 - [ ] Disconnect the Cloudflare dashboard Git integration (Workers & Pages, circular-led-server, Settings, Builds) if it is connected, so a push does not deploy twice.
-- [ ] Optional: add a branch protection rule on `main` that requires the **Type-check and test** check, and require approval on the `production` environment.
-- [ ] Optional: add a CI status badge to the README.
+- [ ] Move from pushing straight to `main` to pull requests. First squash the early commits. Then add a branch protection rule on `main` that requires the **Type-check and test** check and a pull request, and decide whether to require approval on the `production` environment.
+- [x] CI status badge in the README.
 
 ## Check it works for real
 
@@ -47,7 +47,15 @@ Checked in tests or with fake users. A real person has signed in; the items belo
 
 ## Engineering
 
-- [ ] API integration tests that run in CI. The API rules (pause, delete, edit, rotation) were only checked by hand against a local server with fake users.
+- [x] API integration tests that run in CI (`test/api.test.ts`). The API rules (pause, delete, edit, rotation) were only checked by hand against a local server with fake users.
 - [ ] The proxy at clock.recurse.com caches static pages. After a deploy a page can look stale. Check cache headers, or find out how to purge.
 - [ ] The R2 S3 endpoint failed its TLS handshake from the dev machine (for every hostname, with both `curl` and `openssl`). Cause unknown, probably the network. The S3 keys are optional, so nothing depends on this.
 - [ ] Remove the unused Recurse OAuth app if one is still registered for the old workers.dev address.
+
+## Public repo
+
+- [x] MIT license, credits for redSlug and fcjr, and a note on the vendored p5.js license ([docs/third-party.md](third-party.md)).
+- [x] Dependabot for npm packages and GitHub Actions.
+- [ ] Turn on GitHub secret scanning and push protection (Settings, Code security). On a private repo this needs a paid plan, so do it once the repo is public.
+- [ ] Decide whether the "How the user likes to work" section of CLAUDE.md should stay in the public repo.
+- [ ] Later: rename the Worker, D1 database, R2 bucket and package from `circular-led-*` to `circular-lcd-*`. The display is an LCD. See the note in the README.
