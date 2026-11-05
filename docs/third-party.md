@@ -21,6 +21,12 @@ Our own code stays MIT. It only calls p5 through the normal p5 functions, so the
 
 This is our reading of the license, not legal advice. If you ship this commercially, check it with someone qualified.
 
+## Rubik Dirt (font)
+
+- **What:** [`public/fonts/RubikDirt.woff2`](https://github.com/redSlug/clock/blob/main/public/fonts/RubikDirt.woff2), the web version of the Rubik Dirt font from [Google Fonts](https://fonts.google.com/specimen/Rubik+Dirt). It draws the page titles ("Clock", "Faces") on the home, editor and preview pages. We serve it from our own site, so visitors do not contact Google.
+- **License:** SIL Open Font License 1.1. The full text, with the copyright line, is next to it: [`public/fonts/RubikDirt-OFL.txt`](https://github.com/redSlug/clock/blob/main/public/fonts/RubikDirt-OFL.txt). © 2020 The Rubik Filtered Project Authors (designers NaN and Luke Prowse).
+- **What the license asks of us:** keep the copyright notice and license text with the font (we do), do not sell the font file on its own (we do not), and do not release a modified copy under the original name (we do not modify it). Using it on a website and shipping it in an MIT repo is allowed. The font stays under the OFL, and our code stays MIT.
+
 ## Packages installed with npm
 
 Hono, Better Auth, Drizzle ORM, Wrangler and the rest are installed from npm and bundled into the Worker when it is built. They carry permissive licenses (mostly MIT). We do not copy their source into this repo, and each package's license is in `node_modules/<package>/` after `npm install`.

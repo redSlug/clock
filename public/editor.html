@@ -5,35 +5,42 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Face editor</title>
+<link rel="stylesheet" href="/theme.css">
 <style>
 	* { box-sizing: border-box }
-	body { margin: 0; height: 100vh; display: flex; flex-direction: column; font: 15px/1.4 -apple-system, system-ui, sans-serif; color: #1f2328 }
-	header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid #d0d7de; background: #f6f8fa }
-	header input[type=text] { flex: 1; min-width: 140px; max-width: 360px; padding: 6px 8px }
-	button { padding: 6px 14px; cursor: pointer }
-	#status { color: #656d76; font-size: 13px }
-	main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr }
+	body { margin: 0; height: 100vh; display: flex; flex-direction: column; padding: 36px 30px; font-size: 15px; line-height: 1.4; overflow: hidden }
+	/* the torn-paper wrapper holds the header, the code and the preview; the code box itself stays white with its colors */
+	.paper { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 18px }
+	header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 0 0 10px }
+	header input[type=text] { flex: 1; min-width: 140px; max-width: 360px }
+	#status { color: #4a6b43; font-size: 13px }
+	main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: 14px }
 	/* Syntax highlighting: a colored <pre> sits under a transparent textarea. Both must use identical font, padding and wrapping. */
-	.code-wrap { position: relative; min-height: 0; border-right: 1px solid #d0d7de; background: #fff; overflow: hidden }
+	.code-wrap { position: relative; min-height: 0; border: 1px solid #8aa57a; border-radius: 10px; background: #fff; overflow: hidden }
 	#hl, #code { position: absolute; inset: 0; margin: 0; padding: 12px; border: 0; font: 13px/1.5 ui-monospace, Menlo, monospace; font-variant-ligatures: none; letter-spacing: 0; tab-size: 2; white-space: pre; overflow: auto }
-	#hl { overflow: hidden; pointer-events: none; color: #1f2328 }
+	/* Wrap lines is off by default (one line per row, scroll sideways). It is a checkbox; checking it adds .wrap to the code box. */
+	.code-wrap.wrap #hl, .code-wrap.wrap #code { white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: hidden; scrollbar-gutter: stable }
+	#wrapbox { display: flex; gap: 5px; align-items: center; font-size: 13px; cursor: pointer }
+	#hl { overflow-y: hidden; pointer-events: none; color: #1f2328 }
 	#code { resize: none; outline: none; background: transparent; color: transparent; -webkit-text-fill-color: transparent; caret-color: #1f2328 }
 	#code::selection { background: rgba(9, 105, 218, .25) }
 	.hl-c { color: #6e7781; font-style: italic } .hl-s { color: #0a3069 } .hl-n { color: #0550ae } .hl-k { color: #cf222e }
 	.hl-f { color: #8250df } .hl-p { color: #0550ae } .hl-b { color: #953800 }
-	.right { min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: #111; color: #eee }
-	#disc { width: min(100%, 62vh); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #000; outline: 2px solid #333 }
-	#err { color: #f88; font: 12px ui-monospace, monospace; min-height: 1.4em; max-width: 100%; overflow-wrap: anywhere }
+	.right { min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 4px }
+	#disc { width: min(100%, 56vh); aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #000; outline: 3px solid #fff; box-shadow: 0 4px 14px rgba(0,0,0,.35) }
+	#err { color: #b42318; font: 12px ui-monospace, monospace; min-height: 1.4em; max-width: 100%; overflow-wrap: anywhere }
 	.right label { font-size: 13px; display: flex; gap: 6px; align-items: center }
-	a { color: #0969da }
-	@media (max-width: 800px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr }   .code-wrap { border-right: 0; border-bottom: 1px solid #d0d7de } #disc { width: min(100%, 38vh) } }
+	@media (max-width: 800px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr } #disc { width: min(100%, 32vh) } }
 </style>
 </head>
 <body>
+<script src="/theme.js"></script>
+<div class="paper">
 <header>
 	<a href="/">&larr; Faces</a>
 	<input id="name" type="text" maxlength="80" placeholder="Face name" aria-label="Face name">
 	<button id="save">Save</button>
+	<label id="wrapbox"><input type="checkbox" id="wrap"> Wrap lines</label>
 	<span id="status"></span>
 </header>
 <main>
@@ -47,6 +54,7 @@
 		<div id="err"></div>
 	</div>
 </main>
+</div>
 <script src="/host.js"></script>
 <script src="/highlight.js"></script>
 <script>
@@ -77,6 +85,14 @@
 		$("hl").scrollLeft = $("code").scrollLeft
 	}
 	$("code").addEventListener("scroll", function () { $("hl").scrollTop = this.scrollTop; $("hl").scrollLeft = this.scrollLeft })
+
+	// Wrap-lines toggle, remembered in this browser.
+	function applyWrap() {
+		document.querySelector(".code-wrap").classList.toggle("wrap", $("wrap").checked)
+		paint()
+	}
+	$("wrap").checked = localStorage.getItem("wrapLines") === "on"
+	$("wrap").addEventListener("change", function () { localStorage.setItem("wrapLines", this.checked ? "on" : "off"); applyWrap() })
 
 	$("code").addEventListener("input", function () { paint(); renderSoon() })
 	$("code").addEventListener("keydown", function (e) {
@@ -127,7 +143,7 @@
 			$("name").value = "My new face"
 			$("code").value = await fetch("/starter-face.js").then(function (r) { return r.text() })
 		}
-		paint()
+		applyWrap()
 		render()
 	}
 	init().catch(function (e) { setStatus(e.message) })
